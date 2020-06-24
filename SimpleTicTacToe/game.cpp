@@ -25,7 +25,8 @@ void Game::playGameWithGeneratedMoves() const {
 	Board gameBoard;
 
 	while (gameBoard.hasFlag(BOARD_STATUS_IN_PROGRESS)) {
-		const Coords aiMove = BEST_MOVES.at({ gameBoard.getBoard(0), gameBoard.getBoard(1) });
+		const char aiMoveChar = BEST_MOVES.at({ gameBoard.getBoard(0), gameBoard.getBoard(1) });
+		const Coords aiMove{ aiMoveChar / BOARD_DIM, aiMoveChar % BOARD_DIM };
 		gameBoard.playMove(aiMove);
 		std::cout << gameBoard << std::endl;
 		std::cout << "AI Moved: " << aiMove << std::endl << std::endl;

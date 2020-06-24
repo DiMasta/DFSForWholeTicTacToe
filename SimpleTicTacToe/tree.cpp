@@ -62,25 +62,6 @@ void Tree::dfsTraverse(const int depth, const int currentRootIdx, Coords(&allMov
 //********************************************************************************************************************
 //********************************************************************************************************************
 
-void Tree::backtrack(const int nodeIdx, const int turnsToEnd, const short boardScore) {
-	const Node& currentNode = getNode(nodeIdx);
-	const int parentIdx = currentNode.getParent();
-
-	if (INVALID_IDX == parentIdx) {
-		return;
-	}
-
-	Node& parentNode = getNode(parentIdx);
-	Board& parentBoard = parentNode.getBoard();
-
-	backtrackScore(parentBoard, currentNode, turnsToEnd, boardScore);
-
-	backtrack(parentIdx, turnsToEnd + 1, parentBoard.getScore());
-}
-
-//********************************************************************************************************************
-//********************************************************************************************************************
-
 void Tree::expand(const int nodeIdx, Coords(&allMoves)[ALL_SQUARES], int& allMovesCount) {
 	Node& node = getNode(nodeIdx);
 	Board& board = node.getBoard();
@@ -130,53 +111,6 @@ void Tree::init() {
 //********************************************************************************************************************
 //********************************************************************************************************************
 
-void Tree::backtrackScore(
-	Board& parentBoard,
-	const Node& currentNode,
-	const int turnsToEnd,
-	const short boardScore
-) {
-	if (INVALID_SCORE == parentBoard.getScore()) {
-		parentBoard.setScore(boardScore);
-		setBestMove(parentBoard, currentNode, turnsToEnd);
-	}
-	else if (parentBoard.hasFlag(X_TO_MOVE)) {
-		// Maximize for X
-		if (parentBoard.getScore() <= boardScore) {
-			parentBoard.setScore(boardScore);
-			setBestMove(parentBoard, currentNode, turnsToEnd);
-		}
-	}
-	else if (!parentBoard.hasFlag(X_TO_MOVE)) {
-		// Minimize for O
-		if (parentBoard.getScore() >= boardScore) {
-			parentBoard.setScore(boardScore);
-			setBestMove(parentBoard, currentNode, turnsToEnd);
-		}
-	}
-}
-
-//********************************************************************************************************************
-//********************************************************************************************************************
-
-void Tree::setBestMove(Board& parentBoard, const Node& currentNode, const int turnsToEnd) {
-	const std::pair<short, short> parentBoardsPair{ parentBoard.getBoard(0), parentBoard.getBoard(1) };
-
-	//if (checkedBoards.end() == checkedBoards.find(parentBoardsPair)) {
-	//	checkedBoards[parentBoardsPair] = { currentNode.getMove(), turnsToEnd };
-	//}
-	//else {
-	//	if (checkedBoards[parentBoardsPair].second >= turnsToEnd) {
-	//		checkedBoards[parentBoardsPair] = { currentNode.getMove(), turnsToEnd };
-	//	}
-	//}
-
-	checkedBoards[parentBoardsPair] = { currentNode.getMove(), turnsToEnd };
-}
-
-//********************************************************************************************************************
-//********************************************************************************************************************
-
 void Tree::collectBestMoves() {
 	for (size_t nodeIdx = 0; nodeIdx < nodes.size(); ++nodeIdx) {
 		const Node& node = nodes[nodeIdx];
@@ -187,7 +121,7 @@ void Tree::collectBestMoves() {
 		}
 
 		const std::pair<short, short> boardsPair{ board.getBoard(0), board.getBoard(1) };
-		checkedBoards[boardsPair] = { node.getBestMove(), 0 };
+		checkedBoards[boardsPair] = (node.getBestMove().rowIdx * BOARD_DIM) + node.getBestMove().colIdx;
 	}
 }
 
@@ -198,15 +132,15 @@ void Tree::outputResults() const {
 	std::ofstream outputFile;
 	outputFile.open("best_moves.txt");
 
-	outputFile << "static const std::map<std::pair<short, short>, Coords> BEST_MOVES = {" << std::endl;
+	outputFile << "static const std::map<std::pair<short, short>, char> BEST_MOVES = {" << std::endl;
 
 	int elementsCount = 0;
 	for (BestMovesMap::const_iterator it = checkedBoards.begin(); it != checkedBoards.end(); ++it) {
 		outputFile << "{{";
 		outputFile << it->first.first << "," << it->first.second;
-		outputFile << "},{";
-		outputFile << it->second.first.rowIdx << "," << it->second.first.colIdx;
-		outputFile << "}},";
+		outputFile << "},";
+		outputFile << static_cast<int>(it->second);
+		outputFile << "},";
 
 		if (elementsCount > 0 && 0 == (elementsCount % 100)) {
 			outputFile << std::endl;
