@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Directory
+.vs/
+Debug/
+Release/
+SimpleTicTacToe/Debug/
+SimpleTicTacToe/Release/
