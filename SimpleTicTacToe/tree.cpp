@@ -182,6 +182,10 @@ void Tree::collectBestMoves() {
 		const Node& node = nodes[nodeIdx];
 		const Board& board = node.getBoard();
 
+		if (!board.hasFlag(BOARD_STATUS_IN_PROGRESS)) {
+			continue;
+		}
+
 		const std::pair<short, short> boardsPair{ board.getBoard(0), board.getBoard(1) };
 		checkedBoards[boardsPair] = { node.getBestMove(), 0 };
 	}
