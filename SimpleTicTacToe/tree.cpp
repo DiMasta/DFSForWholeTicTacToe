@@ -200,12 +200,19 @@ void Tree::outputResults() const {
 
 	outputFile << "static const std::map<std::pair<short, short>, Coords> BEST_MOVES = {" << std::endl;
 
+	int elementsCount = 0;
 	for (BestMovesMap::const_iterator it = checkedBoards.begin(); it != checkedBoards.end(); ++it) {
-		outputFile << "\t{ { ";
-		outputFile << it->first.first << ", " << it->first.second;
-		outputFile << " }, { ";
-		outputFile << it->second.first.rowIdx << ", " << it->second.first.colIdx;
-		outputFile << " } }," << std::endl;
+		outputFile << "{{";
+		outputFile << it->first.first << "," << it->first.second;
+		outputFile << "},{";
+		outputFile << it->second.first.rowIdx << "," << it->second.first.colIdx;
+		outputFile << "}},";
+
+		if (elementsCount > 0 && 0 == (elementsCount % 100)) {
+			outputFile << std::endl;
+		}
+
+		++elementsCount;
 	}
 
 	outputFile << "};" << std::endl;
